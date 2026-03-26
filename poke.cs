@@ -6,7 +6,7 @@ using System.Threading;
 public class Player
 {
     public int direction = 4;
-
+    public int encounterImunity = 3;
     public void Menu()
     {
         string[] options = { "Trainer", "Bag", "Pokemon" };
@@ -156,7 +156,7 @@ class Map
         }
     }
 
-    public Map MovePlayer(int dir)
+    public Map MovePlayer(int dir, Player playa)
     {
         int dirX = 0, dirY = 0;
         switch (dir)
@@ -177,6 +177,10 @@ class Map
         {
             playerX = newX;
             playerY = newY;
+            if (tile == 'g')
+            {
+                CheckEncounter(playa);
+            }
         }
         if (tile == 'v' && dirY == 1)
         {
@@ -205,6 +209,23 @@ class Map
         playerY = port.playerY;
     }
 
+    public void CheckEncounter(Player playa)
+    {
+        if (playa.encounterImunity < 1)
+        {
+            Random pkmn = new Random();
+            Random check = new Random();
+            if (pkmn.Next(15, 26) > check.Next(0, 256))
+            {
+                Encounter( playa);
+            }
+        }
+        playa.encounterImunity--;
+    }
+    public void Encounter(Player playa)
+    {
+
+    }
     public void Interact(Player playa)
     {
         int dir = playa.direction;
@@ -228,7 +249,6 @@ class Map
             switch (tile)
             {
                 case 'n':
-                    Console.WriteLine("negr");
                     break;
                 case 'P':
                     break;
@@ -245,7 +265,7 @@ class Map
 class Program
 {
     public static string[] levelData = {
-        "w"
+        ""
     };
 
     public static string[] levelData1 = {
@@ -778,8 +798,8 @@ class Program
     public static Port portAshToPallet = new Port(3, 5, 8);
 
     public static Port portPalletToAsh = new Port(2, 4, 6);
-    public static Port portPalletToDaisy = new Port(5, 4, 6);
-    public static Port portPalletToLab = new Port(4, 4, 9);
+    public static Port portPalletToDaisy = new Port(5, 4, 7);
+    public static Port portPalletToLab = new Port(4, 6, 11);
     public static Port portPalletToRoute1 = new Port(6, 7, 35);
 
     public static Port portDaisyToPallet = new Port(3, 13, 8);
@@ -787,44 +807,44 @@ class Program
     public static Port portLabToPallet = new Port(3, 12, 14);
 
     public static Port portRoute1ToPallet = new Port(3, 10, 1);
-    public static Port portRoute1ToViridian = new Port(7, 19, 32);
+    public static Port portRoute1ToViridian = new Port(7, 19, 34);
 
     public static Port portViridianToRoute1 = new Port(6, 7, 2);
     public static Port portViridianToPokeCenter = new Port(8, 4, 8);
-    public static Port portViridianToPokeMart = new Port(9, 4, 9);
-    public static Port portViridianToVHouse1 = new Port(10, 4, 6);
-    public static Port portViridianToVHouse2 = new Port(11, 4, 6);
-    public static Port portViridianToRoute22 = new Port(12, 7, 2);
+    public static Port portViridianToPokeMart = new Port(9, 4, 7);
+    public static Port portViridianToVHouse1 = new Port(10, 3, 7);
+    public static Port portViridianToVHouse2 = new Port(11, 3, 7);
+    public static Port portViridianToRoute22 = new Port(12, 38, 7);
     public static Port portViridianToRoute2 = new Port(14, 9, 73);
 
-    public static Port portPokeCenterToViridian = new Port(7, 7, 2);
+    public static Port portPokeCenterToViridian = new Port(7, 22, 27);
 
-    public static Port portPokeMartToViridian = new Port(7, 7, 2);
+    public static Port portPokeMartToViridian = new Port(7, 28, 21);
 
-    public static Port portVHouse1ToViridian = new Port(7, 7, 2);
+    public static Port portVHouse1ToViridian = new Port(7, 20, 17);
 
-    public static Port portVhouse2ToViridian = new Port(7, 7, 2);
+    public static Port portVhouse2ToViridian = new Port(7, 20, 11);
 
-    public static Port portRoute22ToViridian = new Port(7, 7, 2);
-    public static Port portRoute22ToVictoryRoadCheck = new Port(13, 7, 2);
+    public static Port portRoute22ToViridian = new Port(7, 1, 16);
+    public static Port portRoute22ToVictoryRoadCheck = new Port(13, 5, 7);
 
-    public static Port portVictoryRoadCheckToRoute22 = new Port(12, 7, 2);
+    public static Port portVictoryRoadCheckToRoute22 = new Port(12, 7, 5);
 
     public static Port portRoute2ToViridian = new Port(7, 17, 2);
     public static Port portRoute2ToViridianForestBottom = new Port(15, 5, 7);
-    public static Port portRoute2ToViridianForestTop = new Port(17, 12, 14);
-    public static Port portRoute2ToPewter = new Port(18, 12, 14);
+    public static Port portRoute2ToViridianForestTop = new Port(17, 6, 1);
+    public static Port portRoute2ToPewter = new Port(18, 15, 32);
 
-    public static Port portViridianForestBottomToRoute2 = new Port(14, 12, 14);
+    public static Port portViridianForestBottomToRoute2 = new Port(14, 4, 46);
     public static Port portViridianForestBottomToViridianForest = new Port(16, 17, 48);
 
-    public static Port portViridianForestToViridianForestBottom = new Port(15, 11, 48);
-    public static Port portViridianForestToVidianForestTop = new Port(17, 12, 14);
+    public static Port portViridianForestToViridianForestBottom = new Port(15, 6, 1);
+    public static Port portViridianForestToVidianForestTop = new Port(17, 5, 7);
 
-    public static Port portViridianForestTopToViridianForest = new Port(16, 12, 14);
-    public static Port portViridianForestTopToRoute2 = new Port(14, 12, 14);
+    public static Port portViridianForestTopToViridianForest = new Port(16, 2, 1);
+    public static Port portViridianForestTopToRoute2 = new Port(14, 4, 12);
 
-    public static Port portPewterToRoute2 = new Port(14, 12, 14);
+    public static Port portPewterToRoute2 = new Port(14, 9, 2);
     public static Port portPewterToPewterPokeCenter = new Port(19, 4, 8);
     public static Port portPewterToPewterPokeMart = new Port(20, 4, 7);
     public static Port portPewterToGym = new Port(21, 5, 14);
@@ -853,14 +873,14 @@ class Program
     public static Map Lab = new Map(4, levelData4, new List<Port> { portLabToPallet });
     public static Map Daisy = new Map(5, levelData5, 4, 6, new List<Port> { portDaisyToPallet });
     public static Map Route1 = new Map(6, levelData6, 7, 35, new List<Port> { portRoute1ToPallet, portRoute1ToViridian });
-    public static Map Viridian = new Map(7, levelData7, 19, 32, new List<Port> { portViridianToRoute1, portViridianToRoute22, portViridianToPokeCenter, portViridianToPokeMart, portViridianToVHouse1, portViridianToVHouse2, portViridianToRoute2 });
+    public static Map Viridian = new Map(7, levelData7, 17, 2, new List<Port> { portViridianToRoute1, portViridianToRoute22, portViridianToPokeCenter, portViridianToPokeMart, portViridianToVHouse1, portViridianToVHouse2, portViridianToRoute2 });
     public static Map PokeCenter = new Map(8, levelData8, new List<Port> { portPokeCenterToViridian });
     public static Map PokeMart = new Map(9, levelData9, new List<Port> { portPokeMartToViridian });
     public static Map VHouse1 = new Map(10, levelData10, new List<Port> { portVHouse1ToViridian });
     public static Map Vhouse2 = new Map(11, levelData11, new List<Port> { portVhouse2ToViridian });
     public static Map Route22 = new Map(12, levelData12, new List<Port> { portRoute22ToViridian, portRoute22ToVictoryRoadCheck });
     public static Map VictoryRoadCheck = new Map(13, levelData13, new List<Port> { portVictoryRoadCheckToRoute22 });
-    public static Map Route2 = new Map(14, levelData14, 9, 73, new List<Port> { portRoute2ToViridian, portRoute2ToViridianForestBottom, portRoute2ToViridianForestTop, portRoute2ToPewter });
+    public static Map Route2 = new Map(14, levelData14, 4, 12, new List<Port> { portRoute2ToViridian, portRoute2ToViridianForestBottom, portRoute2ToViridianForestTop, portRoute2ToPewter });
     public static Map ViridianForestBottom = new Map(15, levelData15, new List<Port> { portViridianForestBottomToRoute2, portViridianForestBottomToViridianForest });
     public static Map ViridianForest = new Map(16, levelData16, new List<Port> { portViridianForestToViridianForestBottom, portViridianForestToVidianForestTop });
     public static Map ViridianForestTop = new Map(17, levelData17, new List<Port> { portViridianForestTopToViridianForest, portViridianForestTopToRoute2 });
@@ -883,7 +903,7 @@ class Program
 
     public static void Main()
     {
-        Map currentMap = mapList[14];
+        Map currentMap = mapList[1];
         currentMap.UpdateMap();
         int direction = 0;
         Player playa = new Player();
@@ -908,7 +928,7 @@ class Program
 
             if (move)
             {
-                currentMap = currentMap.MovePlayer(direction);
+                currentMap = currentMap.MovePlayer(direction, playa);
                 currentMap.UpdateMap();
             }
             else if (input == ConsoleKey.Z)
