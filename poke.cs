@@ -384,7 +384,7 @@ class Program
         "1pppppwaaaaaaaaw   w4ww            w",
         "1    ppaaaaaaaa          ppwwwwpp  w",
         "1    pppppppppp t  wwww  ppwwwwpp  w",
-        "1                  pppp  ppwwwwpp  w",
+        "www                pppp  ppwwwwpp  w",
         "www                pppp  ppw3wwpp  w",
         "  w  pppppppppp                    w",
         "  waaaapppppppp                    w",
@@ -440,6 +440,7 @@ class Program
         "ww      ww",
         "www00wwwww"
     };
+
     public static string[] levelData11 = {
         "wwwwwwwwww",
         "www     ww",
@@ -451,7 +452,25 @@ class Program
         "ww      ww",
         "www00wwwww"
     };
-    public static string[] levelData12 = levelData;
+
+    public static string[] levelData12 = {
+    "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww  ",
+    "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwppppppwww  ",
+    "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwvvvpvvwww  ",
+    "wwwwwwwwwwwwwww                    www  ",
+    "wwwwwww1wwwwwww                    wwwww",
+    "w            ww      sssswwwwppppwwpppp0",
+    "w            wwvvvvvvsssswwwwvpvvwppppp0",
+    "wppppppppppppwwggggggsssswwwwggggwp    0",
+    "wvvvvvvvvvpvvwwggggggsssswwwwggggwp    0",
+    "w            wwggggggppppwwwwggggwp  www",
+    "w    wtwwwwwwwwggggggppppwwwwggggwp  w  ",
+    "wppppppppppppppppppppppppwwwwppppppppw  ",
+    "wvvvvvvvvvvvvvvvvvvvvvvvvwwwwvvvpvvvvw  ",
+    "w                                    w  ",
+    "w                                    w  ",
+    "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww  "
+};
 
     public static string[] levelData13 = {
     "wwwww99wwwww",
@@ -543,6 +562,7 @@ class Program
     "aaaaaaaw000aaaaaaaaaaa",
     "aaaaaaaw   aaaaaaaaaaa",
 };
+
     public static string[] levelData15 = {
     "wwwwww1wwwww",
     "w          w",
@@ -555,7 +575,58 @@ class Program
     "wwwww00wwwww"
 };
 
-    public static string[] levelData16 = levelData;
+    public static string[] levelData16 = {
+    "aw11waaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "aw  waawwwwwwwwaawwwwwwwwwwwwwwwwwwa",
+    "aw twaa        aa                 wa",
+    "aw  waa        aa                 wa",
+    "aw  waa        aa    wwwwwwwwww   wa",
+    "aw  waa   ww   aa   waaaaaaaaaaw  wa",
+    "aw  waa   ww   aa   waaaaaaaaaaw  wa",
+    "awggwaagggwwgggaagggwaaaaaaaaaaw  wa",
+    "awggwaagggwwgggaagggwaaaaaaaaaaw  wa",
+    "awggwaagggwwgggaagggggggg         wa",
+    "awggwaagggwwgggaagggggggg         wa",
+    "awggwaagggwwgggaagggwaaaaw  waagggwa",
+    "awggwaagggwwgggaagggwaaaaw  waagggwa",
+    "awggwaagggwwgggaagggwaaaaw  waagggwa",
+    "awggwaagggwwgggaagggwaaaaw  waagggwa",
+    "awggwaagggwwgggaagggwaaaaw  waagggwa",
+    "awggwaagggwwgggaagggwaaaaw  waagggwa",
+    "awggwaagggwwggg  gggwaaaaw  waagggwa",
+    "awggwaagggwwggg  gggwaaaaw twaagggwa",
+    "awggwaagggww        waaaaw        wa",
+    "awggwaagggww        waaaaw        wa",
+    "awggwaagggwaaaaaaaaaaaaaawgggaaw  wa",
+    "awggwaagggwaaaaaaaaaaaaaawgggaaw  wa",
+    "awggg  gggwaaaaaaaaaaaaaawgggaaw  wa",
+    "awggg  gggwaaaaaaaaaaaaaawgggaaw  wa",
+    "aw   t        waaaaaaaaaawgggaaw  wa",
+    "aw            waaaaaaaaaawgggaaw  wa",
+    "aaaaaaaaaaaw  waaaaaaaaaawgggaaw  wa",
+    "aaaaaaaaaaaw  waaaaaaaaaawgggaaw  wa",
+    "aaaaaaaaaaaw  waaaaaaaaaawgggaaw  wa",
+    "aaaaaaaaaaaw  waaaaaaaaaawgggaaw  wa",
+    "awggggggggwaaaaaaaaaaaaaawgggaaw  wa",
+    "awggggggggwaaaaaaaaaaaaaawgggaaw  wa",
+    "aaaaaaa  ggggggggt gwaaaawg       wa",
+    "aaaaaaa  gggggggg  gwaaaawg       wa",
+    "aaaaaaa  gwaaaawg  gwaaaawg  aaaaaaa",
+    "aaaaaaa  gwaaaawg  gwaaaawg  aaaaaaa",
+    "aaaaaaa  gwaaaawg  gwaaaawg  aaaaaaa",
+    "aaaaaaa  gwaaaawg  gwaaaawg  aaaaaaa",
+    "aaaaaaa  gwaaaawg  gwaaaawg  aaaaaaa",
+    "aaaaaaa  gwaaaawg  gwaaaawg  aaaaaaa",
+    "awggggg  gggggggg  ggggggtg  gggggwa",
+    "awggggg  ggggggggaagggggggg  gggggwa",
+    "awggggg          aa          gggggwa",
+    "awggggg                      gggggwa",
+    "aaaaaaaaaaaaaaaw    waaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaw   twaaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaw    waaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaw    waaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaw0000waaaaaaaaaaaaaaa"
+};
 
     public static string[] levelData17 = {
     "wwwwww1wwwww",
@@ -740,14 +811,14 @@ class Program
     public static Port portVictoryRoadCheckToRoute22 = new Port(12, 7, 2);
 
     public static Port portRoute2ToViridian = new Port(7, 17, 2);
-    public static Port portRoute2ToViridianForestBottom = new Port(15, 12, 14);
+    public static Port portRoute2ToViridianForestBottom = new Port(15, 5, 7);
     public static Port portRoute2ToViridianForestTop = new Port(17, 12, 14);
     public static Port portRoute2ToPewter = new Port(18, 12, 14);
 
     public static Port portViridianForestBottomToRoute2 = new Port(14, 12, 14);
-    public static Port portViridianForestBottomToViridianForest = new Port(16, 12, 14);
+    public static Port portViridianForestBottomToViridianForest = new Port(16, 17, 48);
 
-    public static Port portViridianForestToViridianForestBottom = new Port(15, 12, 14);
+    public static Port portViridianForestToViridianForestBottom = new Port(15, 11, 48);
     public static Port portViridianForestToVidianForestTop = new Port(17, 12, 14);
 
     public static Port portViridianForestTopToViridianForest = new Port(16, 12, 14);
@@ -810,7 +881,7 @@ class Program
         PewterPokeCenter, PewterPokeMart, Gym, PHouse1, PHouse2, MuseumBottom, MuseumTop
     };
 
-    static void Main()
+    public static void Main()
     {
         Map currentMap = mapList[14];
         currentMap.UpdateMap();
