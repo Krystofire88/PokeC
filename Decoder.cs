@@ -533,7 +533,6 @@ namespace PokeC_Decoder
     };
         public static string[][] maps = new string[][]
         {
-            levelData,
             levelData1,
             levelData2,
             levelData3,
@@ -617,97 +616,62 @@ namespace PokeC_Decoder
         }
         public static string[] Decode(string encoded)
         {
-            string[] result = null;
-            int numberOfStops = 0;
-            string width = "";
-            string height = "";
-            string charSet = "";
-            bool madeString = false;
-            string[] postionalStrings = new string[15];
-            foreach (char c in encoded)
+            string[] parts = encoded.Split(',');
+
+            int height = int.Parse(parts[0]);
+            int width = int.Parse(parts[1]);
+            string charSet = parts[2];
+
+            string[] result = new string[height];
+
+            // Initialize map with spaces
+            for (int i = 0; i < height; i++)
             {
-                if (c == ',')
-                {
-                    numberOfStops++;
-                    continue;
-                }
-                if (numberOfStops == 0)
-                {
-                    height += c;
-                }
-                else if (numberOfStops == 1)
-                {
-                    width += c;
-                }
-                else if (numberOfStops == 2)
-                {
-                    if (!madeString)
-                    {
-                        result = new string[Convert.ToInt32(height)];
-                        for (int i = 0; i < result.Length; i++)
-                        {
-                            string line = "";
-                            for (int j = 0; j < Convert.ToInt32(width); j++)
-                            {
-                                line += ' ';
-                            }
-                            result[i] = line;
-                        }
-                        madeString = true;
-                    }
-                    charSet += c;
-                }
-                else if (numberOfStops >= 3)
-                {
-                    postionalStrings[numberOfStops - 3] += c;
-                }
+                result[i] = new string(' ', width);
             }
-            for (int sIndex = 0; sIndex < postionalStrings.Length; sIndex++)
+
+            for (int sIndex = 0; sIndex < charSet.Length; sIndex++)
             {
-                string s = postionalStrings[sIndex];
+                string base64 = parts[3 + sIndex];
                 char c = charSet[sIndex];
-                int widthM = Convert.ToInt32(width);
-                int heightM = Convert.ToInt32(height);
-                int bitCount = widthM * heightM;
-                byte[] bytes = Convert.FromBase64String(s);
+
+                byte[] bytes = Convert.FromBase64String(base64);
                 BigInteger value = new BigInteger(bytes, isUnsigned: true, isBigEndian: false);
 
-                bool[] charMap = new bool[bitCount];
-                for (int i = 0; i < bitCount; i++)
-                {
-                    charMap[i] = ((value >> i) & BigInteger.One) == BigInteger.One;
-                }
+                int bitCount = width * height;
 
-                // Fill result array
                 int index = 0;
-                for (int y = 0; y < result.Length; y++)
+                for (int y = 0; y < height; y++)
                 {
-                    char[] lineChars = result[y].ToCharArray(); // convert string to char array for modification
-                    for (int x = 0; x < lineChars.Length; x++)
+                    char[] line = result[y].ToCharArray();
+
+                    for (int x = 0; x < width; x++)
                     {
-                        if (index < bitCount && charMap[index])
+                        if (((value >> index) & BigInteger.One) == BigInteger.One)
                         {
-                            lineChars[x] = c;
+                            line[x] = c;
                         }
                         index++;
                     }
-                    result[y] = new string(lineChars); // write back the modified line
+
+                    result[y] = new string(line);
                 }
             }
+
             return result;
         }
         static void Main(string[] args)
         {
-            //  foreach (string[] map in maps)
-            // {
-            string encoded = Encode(levelData7);
-            Console.WriteLine(encoded);
-            string[] decoded = Decode(encoded);
-            foreach (string line in decoded)
-            {
-                Console.WriteLine(line);
-            }
-            // }      
+            foreach (string[] map in maps)
+           {
+                string encoded = Encode(map);
+                Console.WriteLine(encoded);
+                string[] decoded = Decode(encoded);
+                foreach (string line in decoded)
+                {
+                    Console.WriteLine(line);
+                }
+            }      
         }
     }
 }
