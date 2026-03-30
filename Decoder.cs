@@ -662,32 +662,39 @@ namespace PokeC_Decoder
                     postionalStrings[numberOfStops - 3] += c;
                 }
             }
-            foreach (string s in postionalStrings)
+            for (int sIndex = 0; sIndex < postionalStrings.Length; sIndex++)
             {
-                char c = charSet[postionalStrings.ToList().IndexOf(s)];
+                string s = postionalStrings[sIndex];
+                char c = charSet[sIndex];
                 int widthM = Convert.ToInt32(width);
                 int heightM = Convert.ToInt32(height);
                 int bitCount = widthM * heightM;
                 byte[] bytes = Convert.FromBase64String(s);
-                BigInteger value = new BigInteger(bytes, isUnsigned: true, isBigEndian: true);
+                BigInteger value = new BigInteger(bytes, isUnsigned: true, isBigEndian: false);
 
-                // convert BigInteger to bool array
                 bool[] charMap = new bool[bitCount];
                 for (int i = 0; i < bitCount; i++)
                 {
                     charMap[i] = ((value >> i) & BigInteger.One) == BigInteger.One;
                 }
 
-                // iterate over bools
-                for (int i = 0; i < heightM; i++)
+                // Fill result array
+                int index = 0;
+                for (int y = 0; y < result.Length; y++)
                 {
-                    for (int j = 0; j < widthM; j++)
+                    char[] lineChars = result[y].ToCharArray(); // convert string to char array for modification
+                    for (int x = 0; x < lineChars.Length; x++)
                     {
-
+                        if (index < bitCount && charMap[index])
+                        {
+                            lineChars[x] = c;
+                        }
+                        index++;
                     }
+                    result[y] = new string(lineChars); // write back the modified line
                 }
             }
-            return result;           
+            return result;
         }
         static void Main(string[] args)
         {
