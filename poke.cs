@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 using System.ComponentModel.Design;
+using System.Xml.Linq;
 public enum Status
 {
     None = 0,
@@ -118,7 +119,7 @@ public class Pokemon
         }
         this.gender = g;
         this.level = level;
-        exp = this.ExpToLevel();
+        exp = this.ExpToLevel(0);
         this.HpIV = Random.Shared.Next(0, 15);
         this.HpEV = 0;
         this.AtkIV = Random.Shared.Next(0, 15);
@@ -146,32 +147,6 @@ public class Pokemon
             moveSet[moveNum] = move;
             moveNum++;
         }
-    }
-    public bool CheckForMove(MoveB moveb)
-    {
-        bool isMove = false;
-        for (int i = 0; i < 4; i++)
-        {
-            if (moveSet[i] == null)
-            {
-                break;
-            }
-            if (moveSet[i].moveB == moveb)
-            {
-                isMove = true;
-                break;
-            }
-        }
-        return isMove;
-    }
-    public void Modifiers()
-    {
-        Console.Write($"Atk: {AtkMod} / ");
-        Console.Write($"Def: {DefMod} / ");
-        Console.Write($"Spa: {SpaMod} / ");
-        Console.Write($"Acc: {AccMod} / ");
-        Console.Write($"Eva: {EvaMod} / ");
-        Console.WriteLine($"Spe: {SpeMod} ");
     }
     public void ClearMods()
     {
@@ -217,8 +192,8 @@ public class Pokemon
         if (gender == true) Console.Write(" (M) ");
         else Console.Write(" (F) ");
         Console.WriteLine();
-        Console.WriteLine($"Level: {level}");
-
+        Console.WriteLine($"Hp: {hp}/{maxHP}");
+        Console.WriteLine($"Level: {level} Exp:{+ exp} Exp to next level: {ExpToLevel(1) - exp}");
 
         var evParts = new List<string>();
         if (HpEV != 0) evParts.Add($"{HpEV} HP");
@@ -249,34 +224,14 @@ public class Pokemon
         {
             if (moveSet[i] == null)
             {
-                i += 4;
+                break;
             }
             else
             {
-                Console.WriteLine($"-{moveSet[i].moveB.name}");
+                Console.WriteLine($"-{moveSet[i].moveB.name} PP: {moveSet[i].PP}/{moveSet[i].moveB.maxPP}");
             }
         }
         Console.WriteLine();
-    }
-    public string GetType(Type type)
-    {
-        return type switch
-        {
-            Type.None => "",
-            Type.Normal => "Normal",
-            Type.Fire => "Fire",
-            Type.Water => "Water",
-            Type.Electric => "Electric",
-            Type.Grass => "Grass",
-            Type.Fighting => "Fighting",
-            Type.Poison => "Poison",
-            Type.Ground => "Ground",
-            Type.Flying => "Flying",
-            Type.Psychic => "Psychic",
-            Type.Bug => "Bug",
-            Type.Rock => "Rock",
-            _ => "error"
-        };
     }
     public double GetMod(int value)
     {
@@ -422,20 +377,20 @@ public class Pokemon
                 return false;
         }
     }
-    public int ExpToLevel()
+    public int ExpToLevel(int i)
     {
         if(species.expGroup)
         {
-            return Convert.ToInt32(Math.Max(Math.Floor((Math.Pow(level, 3) * 6/5) - (15 * Math.Pow(level, 2)) + (100 * level) - 140), 0));
+            return Convert.ToInt32(Math.Max(Math.Floor((Math.Pow((level + i), 3) * 6/5) - (15 * Math.Pow((level + i), 2)) + (100 * (level + i)) - 140), 0));
         }
         else
         {
-            return Convert.ToInt32(Math.Max(Math.Floor(Math.Pow(level, 3)), 0));
+            return Convert.ToInt32(Math.Max(Math.Floor(Math.Pow((level + 1), 3)), 0));
         }
     }
     public void CheckLevelUp()
     {
-        while (exp >= ExpToLevel())
+        while (exp >= ExpToLevel(0))
         {
             level++;
             Console.WriteLine($"{name} grew to level {level}!");
@@ -536,7 +491,15 @@ public class Move
     }
  
 }
-public class NPC { }
+public class Item
+{
+    public string name { get; }
+    public int count { get; set; } = 0;
+    public Item(string name)
+    {
+        this.name = name;
+    }
+}
 public class Trainer
 {
     public string name { get; }
@@ -625,35 +588,121 @@ public class Player : Trainer
 {
     public int direction = 4;
     public int encounterImunity = 3;
-    public bool[] progressFlags = { false, false, false, false, false, false };
+    public int money = 0;
+    public List<Item> bag = new List<Item> { 
+            new Item("Potion"),
+            new Item("Super Potion"),
+            new Item("Ether"),
+            new Item("Revive"),
+            new Item("Repel"),
+            new Item("Pokeball"),
+            new Item("Antidote"),
+            new Item("Paralyze Heal"),
+            new Item("Awakening"),
+            new Item("Burn Heal"),
+            new Item("Rare candy"),
+            new Item("Pokedex"),
+        };
+    public bool[] progressFlags = { true, true, true, true, false, false };
     public Port lastPokeCenter = Program.portPalletToAsh;
-    public Player(string name) : base(name) { }
-
+    public Player(string name) : base(name) {}
     public void Menu()
     {
         string[] options = { "Trainer", "Bag", "Pokemon" };
-        int selectedIndex = 0;
-
+        int selectedIndex = 0;        
         while (true)
         {
+            for (int i = 6; i < 18; i++) // clears previous menu lines
+            {
+                Console.SetCursorPosition(0, i);
+                Console.WriteLine(new string(' ', 40));
+            }
+
+            Console.SetCursorPosition(0, 6);
             for (int i = 0; i < options.Length; i++)
                 Console.WriteLine($"{(i == selectedIndex ? ">" : " ")}  {options[i]}");
 
-            var move = Console.ReadKey().Key;
+            var move = Console.ReadKey(true).Key;
 
-            if (move == ConsoleKey.S)
-                selectedIndex = (selectedIndex + 1) % options.Length;
-            else if (move == ConsoleKey.W)
-                selectedIndex = (selectedIndex - 1 + options.Length) % options.Length;
-            else if (move == ConsoleKey.X) return;
-
-            for (int i = 11; i < 18; i++) // clears previous menu lines
+            if (move == ConsoleKey.Z)
             {
-                Console.SetCursorPosition(0, i);
-                Console.WriteLine(new string(' ', 20));
+                bool empty = false;
+                for (int i = 6; i < 18; i++) // clears previous menu lines
+                {
+                    Console.SetCursorPosition(0, i);
+                    Console.WriteLine(new string(' ', 40));
+                }
+                Console.SetCursorPosition(0, 6);
+                switch (selectedIndex)
+                {
+                    case 0:
+                        Console.WriteLine($"Name: {name}");
+                        Console.WriteLine($"Money: ${money}");
+                        break;
+                    case 1:
+                        {
+                            foreach (var item in bag)
+                            {
+                                if (item.count > 0)
+                                {
+                                    Console.WriteLine($"{item.name}: {item.count}");
+                                    empty = true;
+                                }
+                            }
+
+                            if (!empty)
+                                Console.WriteLine("(Empty bag)");
+                            break;
+                        }
+
+                    case 2:
+                        {
+                            foreach (var pk in team)
+                            {
+                                if (pk != null)
+                                {
+                                    pk.PokeInfo();
+                                    empty = true;
+                                }
+                            }
+
+                            if (!empty)
+                                Console.WriteLine("(No pokemon)");
+                            break;
+                        }
+                }
+                while (true)
+                {
+                    move = Console.ReadKey(true).Key;
+                    if (move == ConsoleKey.X || move == ConsoleKey.D) break;
+                }
+            }
+            else if (move == ConsoleKey.DownArrow)
+                selectedIndex = (selectedIndex + 1) % options.Length;
+            else if (move == ConsoleKey.UpArrow)
+                selectedIndex = (selectedIndex - 1 + options.Length) % options.Length;
+            else if (move == ConsoleKey.X || move == ConsoleKey.D)
+            { 
+                for (int i = 6; i < 18; i++) // clears previous menu lines
+                {
+                    Console.SetCursorPosition(0, i);
+                    Console.WriteLine(new string(' ', 40));
+                    Console.SetCursorPosition(0, 6);
+                }
+                return;
             }
 
-            Console.SetCursorPosition(0, 11);
+        }
+    }
+    public void AddItem(string item, int count)
+    {
+        for(int i = 0; i < bag.Count; i++)
+        {
+            if (bag[i].name == item)
+            {
+                bag[i].count += count;
+                return;
+            }
         }
     }
 }
@@ -697,8 +746,13 @@ class Map
     private string ledgeSprite = "ww";
     private string treeSprite = "AA";
     private string branchSprite = "ff";
-    private string machineSprite = "§§";
+    private string machineSprite = "%%";
     private string compSprite = "PC";
+
+    private bool foe1 = false;
+    private bool foe2 = false;
+    private bool foe3 = false;
+    private bool foe4 = false;
 
     public Map(int mapID, string[] map, int playerX, int playerY, List<Port> ports, List<(int pk, int[] lvlRange, int rate)> encounterTable)
     {
@@ -720,6 +774,8 @@ class Map
     public void UpdateMap(Player playa, int oak)
     {
         Console.Clear();
+        Console.BackgroundColor = ConsoleColor.DarkGreen;
+        Console.ForegroundColor = ConsoleColor.Black;
         int oakOffsetX = 1;
         int oakOffsetY = 5;
         if(oak == 9)
@@ -776,8 +832,13 @@ class Map
             }
             Console.WriteLine(line);
         }
+        Console.BackgroundColor = ConsoleColor.Black;
+        Console.ForegroundColor = ConsoleColor.White;
+        if(mapID == 9 && !playa.progressFlags[3])
+        {
+            PlayerRecieveParcel(playa);
+        }
     }
-
     public static void Loading(bool pk)
     {
         int sizeX = 5;
@@ -887,7 +948,7 @@ class Map
         {
             Console.Clear();
             if (playa.progressFlags[playa.progressFlags.Length-1])
-            {
+            {   
                 Console.WriteLine("you won");
             }
             Console.ReadKey();
@@ -895,10 +956,105 @@ class Map
         }
 
         if (passable.Contains(tile))
-        {
+        {      
             playerX = newX;
             playerY = newY;
-            if (tile == 'g')
+            if(mapID == 16)
+            {
+                if((!foe1) && playerX == 31 && playerY == 33)
+                {
+                    Trainer foe = new Trainer("Bug Catcher");
+                    Pokemon weedle = new Pokemon(Program.AllPokemon[12], 6);
+                    weedle.AddMove(new Move(Program.AllMoves[11]));
+                    weedle.AddMove(new Move(Program.AllMoves[28]));
+                    Pokemon caterpie = new Pokemon(Program.AllPokemon[9], 6);
+                    caterpie.AddMove(new Move(Program.AllMoves[9]));
+                    caterpie.AddMove(new Move(Program.AllMoves[28]));
+                    foe.AddPokemon(weedle);
+                    foe.AddPokemon(caterpie);
+                    Console.SetCursorPosition(0, 5);
+                    Console.WriteLine("Hey. you have pokemon right? Cmon, lets battle em!");
+                    Console.ReadLine();
+                    Program.Battle(playa, foe, false);
+                    if (foe.AbleToBattle())
+                    {
+                        Console.SetCursorPosition(0, 5);
+                        Console.WriteLine("You recived 60$!");
+                        playa.money += 60;
+                        Console.ReadLine();
+                        foe1 = true;
+                    }
+                }
+                else if ((!foe2) && playerY == 20 && (playerX == 26 || playerX == 27 || playerX == 28 || playerX == 29 || playerX == 30))
+                {
+                    Trainer foe = new Trainer("Bug Catcher");
+                    Pokemon weedle = new Pokemon(Program.AllPokemon[12], 7);
+                    weedle.AddMove(new Move(Program.AllMoves[11]));
+                    weedle.AddMove(new Move(Program.AllMoves[28]));
+                    Pokemon kakuna = new Pokemon(Program.AllPokemon[13], 7);
+                    kakuna.AddMove(new Move(Program.AllMoves[37]));
+                    foe.AddPokemon(weedle);
+                    foe.AddPokemon(kakuna);
+                    foe.AddPokemon(weedle);
+                    Console.SetCursorPosition(0, 5);
+                    Console.WriteLine("Yo, you cant jam out if youre a pokemon trainer!");
+                    Console.ReadLine();
+                    Program.Battle(playa, foe, false);
+                    if (foe.AbleToBattle())
+                    {
+                        Console.SetCursorPosition(0, 5);
+                        Console.WriteLine("You recived 70$!");
+                        playa.money += 70;
+                        Console.ReadLine();
+                        foe2 = true;
+                    }
+                }
+                else if ((!foe3) && playerX == 2 && playerY == 19)
+                {
+                    Trainer foe = new Trainer("Bug Catcher");
+                    Pokemon weedle = new Pokemon(Program.AllPokemon[12], 9);
+                    weedle.AddMove(new Move(Program.AllMoves[11]));
+                    weedle.AddMove(new Move(Program.AllMoves[28]));
+                    foe.AddPokemon(weedle);
+                    Console.SetCursorPosition(0, 5);
+                    Console.WriteLine("Yo, wait up! Whats the hurry?");
+                    Console.ReadLine();
+                    Program.Battle(playa, foe, false);
+                    if (foe.AbleToBattle())
+                    {
+                        Console.SetCursorPosition(0, 5);
+                        Console.WriteLine("You recived 90$!");
+                        playa.money += 90;
+                        Console.ReadLine();
+                        foe3 = true;
+                    }                 
+                }
+            }
+            else if(mapID == 21 && (!foe4) && playerY == 7 && (playerX == 5 || playerX == 6 || playerX == 7 || playerX == 8))
+            {
+                Trainer foe = new Trainer("Jr. Trainer");
+                Pokemon diglett = new Pokemon(Program.AllPokemon[28], 11);
+                diglett.AddMove(new Move(Program.AllMoves[0]));
+                diglett.AddMove(new Move(Program.AllMoves[14]));
+                Pokemon sandshrew = new Pokemon(Program.AllPokemon[23], 11);
+                sandshrew.AddMove(new Move(Program.AllMoves[0]));
+                sandshrew.AddMove(new Move(Program.AllMoves[6]));
+                foe.AddPokemon(diglett);
+                foe.AddPokemon(sandshrew);
+                Console.SetCursorPosition(0, 5);
+                Console.WriteLine("You are light-years away from facing Brock");
+                Console.ReadLine();
+                Program.Battle(playa, foe, false);
+                if (foe.AbleToBattle())
+                {
+                    Console.SetCursorPosition(0, 5);
+                    Console.WriteLine("You recived 220$!");
+                    playa.money += 220;
+                    Console.ReadLine();
+                    foe4 = true;
+                }
+            }
+            else if (tile == 'g')
             {
                 if (mapID == 3 && (!playa.progressFlags[0] || !playa.progressFlags[1]))
                 {
@@ -929,6 +1085,15 @@ class Map
         if (tile >= '0' && tile <= '9')
         {
             int index = tile - '0';
+            if(index == 6 && !playa.progressFlags[4])
+            {
+                Console.SetCursorPosition(0, 5);
+                Console.WriteLine("Try take a look around the town first");
+                Console.ReadLine();
+                Console.SetCursorPosition(0, 5);
+                Console.WriteLine("                                       ");
+                return this;
+            }
             if (index < ports.Count())
             {
                 var port = ports[index];
@@ -1002,7 +1167,7 @@ class Map
         int newX = playerX + dirX;
         int newY = playerY + dirY;
 
-        char[] interactable = new char[] { 'n', 'P', 'j' };
+        char[] interactable = new char[] { 'n', 'P', 'w' };
         char tile = map[newY][newX];
 
         if (interactable.Contains(tile))
@@ -1018,10 +1183,63 @@ class Map
                         playa.progressFlags[2] = true;
                         playa.HealTeam();
                     }
+                    else if (mapID == 4 && playa.progressFlags[3] && !playa.progressFlags[4])
+                    {
+                        OakReciveParcel(playa);
+                    }
+                    else if (mapID == 4 && playa.progressFlags[4])
+                    {
+                        OakBasic(playa);
+                    }
+                    else if (mapID == 21 && playerY == 3 && !playa.progressFlags[5])
+                    {
+                        BrockFight(playa);
+                        UpdateMap(playa, -1);
+                        if (playa.AbleToBattle())
+                        {
+                            Console.SetCursorPosition(0, 5);
+                            Console.WriteLine($"Brock: Huh, not bad for a beginner! v");
+                            Console.ReadLine();
+                            Console.SetCursorPosition(0, 5);
+                            Console.WriteLine($"Here, take this badge and some money! v");
+                            Console.ReadLine();
+                            Console.SetCursorPosition(0, 5);
+                            Console.WriteLine($"{playa.name} recieved the Boulder Badge! v");
+                            Console.ReadLine();
+                            Console.SetCursorPosition(0, 5);
+                            Console.WriteLine($"{playa.name} recieved 1386$ v               ");
+                            Console.ReadLine();
+                            playa.progressFlags[5] = true;
+                            playa.money += 1386;
+                        }
+                    }
+                    else if (mapID == 21 && playerY == 3 && playa.progressFlags[5])
+                    {
+                        Console.SetCursorPosition(0, 5);
+                        Console.WriteLine($"Brock: Huh, not bad for a beginner! v");
+                        Console.ReadLine();
+                    }
                     break;
                 case 'P':
                     break;
-                case 'j':
+                case 'w':
+                    try
+                    {
+                        tile = map[newY + dirY][newX + dirX];
+                    }
+                    catch
+                    { break; }
+                    if (interactable.Contains(tile))
+                    {
+                        if (tile == 'n' && (mapID == 8 || mapID == 19))
+                        {
+                            PokeCenter(playa);
+                        }
+                        else if (tile == 'n' && (mapID == 9 || mapID == 20))
+                        {
+                            PokeMart(playa);
+                        }
+                    }
                     break;
                 default:
                     return;
@@ -1166,6 +1384,98 @@ class Map
         }
         Console.SetCursorPosition(0, 5);
         Console.WriteLine($"Smell ya' later! v                                                             ");
+        Console.ReadLine();
+    }
+    public void PlayerRecieveParcel(Player playa)
+    {
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Clerk: Oh, hey are you from Pallet town? v");
+        Console.ReadLine();
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"This parcel came for proffesor oak! v         ");
+        Console.ReadLine();
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Can you please deliver it to him? v            ");
+        Console.ReadLine();
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"{playa.name} recived Oaks parcel! v            ");
+        Console.ReadLine(); 
+        playa.progressFlags[3] = true;
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine("                                                  ");
+    }
+    public void OakReciveParcel(Player playa)
+    {
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Oak: Oh, hey {playa.name}! Thanks for bringing me my parcel! v");
+        Console.ReadLine();
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Here, take this as a reward! v                                   ");
+        Console.ReadLine();
+        playa.AddItem("Pokedex", 1);
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"{playa.name} recived a Pokedex! v                                  ");
+        Console.ReadLine();
+        playa.progressFlags[4] = true;
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"And also, take this as to help with your pokedex! v                 ");
+        Console.ReadLine();
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"{playa.name} recived 5 Pokeballs! v                                  ");
+        Console.ReadLine();
+        playa.AddItem("Pokeball", 5);
+    }
+    public void OakBasic(Player playa)
+    {
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Oak: Hey {playa.name}, I see you are doing well on your pokemon journey! v");
+        Console.ReadLine();
+    }
+    public void BrockFight(Player playa)
+    {
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Brock: I am Brock! v");
+        Console.ReadLine();
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"I am Pewters gym leader! v");
+        Console.ReadLine();
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Show me your best! v         ");
+        Console.ReadLine();
+        Trainer brock = new Trainer("Brock");
+        Pokemon geodude = new Pokemon(Program.AllPokemon[29], 12);
+        geodude.AddMove(new Move(Program.AllMoves[9]));
+        geodude.AddMove(new Move(Program.AllMoves[39]));
+        Pokemon onix = new Pokemon(Program.AllPokemon[30], 14);
+        onix.AddMove(new Move(Program.AllMoves[9]));
+        onix.AddMove(new Move(Program.AllMoves[36]));
+        brock.AddPokemon(geodude);
+        brock.AddPokemon(onix);
+        Program.Battle(playa, brock, false);      
+    }
+    public void PokeCenter(Player playa)
+    {
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Nurse: Welcome to the Pokemon Center! v");
+        Console.ReadLine();
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Nurse: We heal your pokemon for free! v");
+        Console.ReadLine();
+        playa.HealTeam();
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Your pokemon have been healed! v             ");
+        Console.ReadLine();
+    }
+    public void PokeMart(Player playa)
+    {
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Shopkeeper: Welcome to the Poke Mart! v");
+        Console.ReadLine();
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Shopkeeper: We sell all kinds of items for your pokemon journey! v");
+        Console.ReadLine();
+        Console.SetCursorPosition(0, 5);
+        Console.WriteLine($"Shopkeeper: But unfortunately I haven't implemented the shop yet! v");
         Console.ReadLine();
     }
 }
@@ -1591,13 +1901,13 @@ class Program
                 if (currentPokemon1.statusNonVol == Status.Paralysis) para = 0.5;
                 spe1 = currentPokemon1.CalcStat(currentPokemon1.species.Spe) * currentPokemon1.GetMod(currentPokemon1.SpeMod) * para;
                 if (input == 1)
-                {      
+                {
                     if (currentPokemon1.chargingMove)
                     {
                         currentPokemon1.selectedMove = currentPokemon1.lastMove;
                     }
                     else
-                    { 
+                    {
                         currentPokemon1.selectedMove = currentPokemon1.PickMove();
                     }
                 }
@@ -1607,12 +1917,48 @@ class Program
                 }
                 else if (input == 3)
                 {
+                    bool empty = false;
+                    int index = 1;
+                    foreach (var item in team1.bag)
+                    {
+                        if (item.count > 0)
+                        {
+                            Console.WriteLine($"[{index}] {item.name}: {item.count}");
+                            empty = true;
+                            index++;
+                        }
+                    }
+
+                    if (!empty)
+                        Console.WriteLine("(Empty bag)");
+
+                    Console.WriteLine("\n what item to use? (back)");
+                    string itemNum = Console.ReadLine().ToLower();
+                    if (itemNum != "back")
+                    {
+                        Console.WriteLine();
+                        int iNum = Convert.ToInt32(itemNum);
+                        var visibleItems = team1.bag.Where(item => item.count > 0).ToList();
+                        int foundItem = visibleItems.FindIndex(item => item.name == "Pokeball");
+
+                        Console.WriteLine(foundItem + 1);
+                        if (iNum == foundItem + 1 && wild)
+                        {
+                            bool caught = CatchPokemon(team1, currentPokemon2);
+                            team1.bag[foundItem].count--;
+                            if (caught) return;
+                        }
+                        else
+                        {
+                            Console.WriteLine("You cant use that here!");
+                        }
+                    }
                 }
                 else if (input == 4)
                 {
                     if (wild)
                     {
-                        if (spe1 > spe2 || r.Next(0,2) == 0)
+                        if (spe1 > spe2 || r.Next(0, 2) == 0)
                         {
                             Console.WriteLine("You got away safely!");
                             return;
@@ -1717,7 +2063,8 @@ class Program
             }
             if (currentPokemon2.hp <= 0 && team2.AbleToBattle())
             {
-                if(!wild)currentPokemon2 = team1.team[++tm2index];
+                if (!wild) currentPokemon2 = team2.team[++tm2index];
+                if (!wild) Console.WriteLine($"{team2.name} sent out {currentPokemon2.name}");
             }
 
         }
@@ -1800,6 +2147,32 @@ class Program
             Console.WriteLine($"{pk.name} is hurt by poison and lost {dmg} HP!");
             pk.boundCounter++;
             if (pk.hp < 0) pk.hp = 0;
+        }
+    }
+    public static bool CatchPokemon(Player playa, Pokemon pokemon)
+    {
+        if (pokemon.hp <= 0)
+            return false;
+
+        int maxHP = pokemon.maxHP;
+        int hp = pokemon.hp;
+        int catchRate = pokemon.species.catchRate;
+
+        int a = ((3 * maxHP - 2 * hp) * catchRate) / (3 * maxHP);
+        if (a > 255) a = 255;
+
+        int r = Random.Shared.Next(0, 256);
+        if (r <= a)
+        {
+            Console.WriteLine($"You caught {pokemon.species.name}!");
+            playa.AddPokemon(pokemon);
+            Console.ReadLine();
+            return true;
+        }
+        else
+        {
+            Console.WriteLine($"{pokemon.species.name} broke free!");
+            return false;
         }
     }
     #region maps
@@ -2154,8 +2527,8 @@ class Program
     "awggwaagggwwgggaagggwaaaaw  waagggwa",
     "awggwaagggwwggg  gggwaaaaw  waagggwa",
     "awggwaagggwwggg  gggwaaaaw twaagggwa",
-    "awggwaagggww        waaaaw        wa",
-    "awggwaagggww        waaaaw        wa",
+    "awgnwaagggww        waaaaw        wa",
+    "awggwaagggww        waaaaw     n  wa",
     "awggwaagggwaaaaaaaaaaaaaawgggaaw  wa",
     "awggwaagggwaaaaaaaaaaaaaawgggaaw  wa",
     "awggg  gggwaaaaaaaaaaaaaawgggaaw  wa",
@@ -2169,7 +2542,7 @@ class Program
     "awggggggggwaaaaaaaaaaaaaawgggaaw  wa",
     "awggggggggwaaaaaaaaaaaaaawgggaaw  wa",
     "aaaaaaa  ggggggggt gwaaaawg       wa",
-    "aaaaaaa  gggggggg  gwaaaawg       wa",
+    "aaaaaaa  gggggggg  gwaaaawg    n  wa",
     "aaaaaaa  gwaaaawg  gwaaaawg  aaaaaaa",
     "aaaaaaa  gwaaaawg  gwaaaawg  aaaaaaa",
     "aaaaaaa  gwaaaawg  gwaaaawg  aaaaaaa",
@@ -2270,7 +2643,7 @@ class Program
         "wwwww  wwwww",
         "ww        ww",
         "ww w  www ww",
-        "ww        ww",
+        "ww  n     ww",
         "ww w  www ww",
         "ww        ww",
         "wwwww  wwwww",
@@ -2454,7 +2827,7 @@ class Program
     public static Map Pewter = new Map(18, levelData18, 11, 7, new List<Port> { portPewterToRoute2, portPewterToPewterPokeCenter, portPewterToPewterPokeMart, portPewterToGym, portPewterToPHouse1, portPewterToPHouse2, portPewterToMuseumBottom }, null);
     public static Map PewterPokeCenter = new Map(19, levelData19, new List<Port> { portPewterPokeCenterToPewter }, null);
     public static Map PewterPokeMart = new Map(20, levelData20, new List<Port> { portPewterPokeMartToPewter }, null);
-    public static Map Gym = new Map(21, levelData21, new List<Port> { portGymToPewter }, null);
+    public static Map Gym = new Map(21, levelData21, 6, 12, new List<Port> { portGymToPewter }, null);
     public static Map PHouse1 = new Map(22, levelData22, new List<Port> { portPHouse1ToPewter }, null);
     public static Map PHouse2 = new Map(23, levelData23, new List<Port> { portPHouse2ToPewter }, null);
     public static Map MuseumBottom = new Map(24, levelData24, new List<Port> { portMuseumBottomToPewter, portMuseumBottomToMuseumTop }, null);
@@ -2785,9 +3158,12 @@ class Program
     }
     public static void Main()
     {
-        // Player playa = Intro();
+        //Player playa = Intro();
         Player playa = new Player("Ash");
-        Map currentMap = mapList[3];
+        Pokemon pk = new Pokemon(AllPokemon[0], 98);
+        pk.AddMove(new Move(AllMoves[0]));
+        playa.AddPokemon(pk);
+        Map currentMap = mapList[1];
         currentMap.UpdateMap(playa, -1);
         int direction = 0;
         while (true)
@@ -2807,13 +3183,14 @@ class Program
 
             switch (input)
             {
-                case ConsoleKey.W: case ConsoleKey.UpArrow: direction = 4; break;
-                case ConsoleKey.A: case ConsoleKey.LeftArrow: direction = 2; break;
-                case ConsoleKey.S: case ConsoleKey.DownArrow: direction = 3; break;
-                case ConsoleKey.D: case ConsoleKey.RightArrow: direction = 1; break;
+                case ConsoleKey.UpArrow: direction = 4; break;
+                case ConsoleKey.LeftArrow: direction = 2; break;
+                case ConsoleKey.DownArrow: direction = 3; break;
+                case ConsoleKey.RightArrow: direction = 1; break;
                 case ConsoleKey.Escape: return;
                 case ConsoleKey.Z: move = false; break;
                 case ConsoleKey.X: move = false; break;
+                case ConsoleKey.D: move = false; break;
             }
 
             if (move)
@@ -2825,7 +3202,7 @@ class Program
             {
                 currentMap.Interact(playa);
             }
-            else if (input == ConsoleKey.X)
+            else if (input == ConsoleKey.D)
             {
                 playa.Menu();
             }
