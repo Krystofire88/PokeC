@@ -603,7 +603,7 @@ public class Player : Trainer
             new Item("Rare candy"),
             new Item("Pokedex"),
         };
-    public bool[] progressFlags = { true, true, true, true, false, false };
+    public bool[] progressFlags = { false, false, false, false, false, false };
     public Port lastPokeCenter = Program.portPalletToAsh;
     public Player(string name) : base(name) {}
     public void Menu()
@@ -3158,11 +3158,7 @@ class Program
     }
     public static void Main()
     {
-        //Player playa = Intro();
-        Player playa = new Player("Ash");
-        Pokemon pk = new Pokemon(AllPokemon[0], 98);
-        pk.AddMove(new Move(AllMoves[0]));
-        playa.AddPokemon(pk);
+        Player playa = Intro();
         Map currentMap = mapList[1];
         currentMap.UpdateMap(playa, -1);
         int direction = 0;
